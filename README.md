@@ -7,13 +7,7 @@
 - [Overview](#overview)
 - [Tools & Technologies](#tools--technologies)
 - [Features & Functionalities](#features--functionalities)
-- [Project Structure](#project-structure)
-- [Setup & Installation](#setup--installation)
-- [Running the Application](#running-the-application)
-- [Database Migrations](#database-migrations)
-- [Usage](#usage)
 - [Future Enhancements](#future-enhancements)
-- [License](#license)
 
 ## Overview
 
