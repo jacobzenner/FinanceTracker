@@ -1,0 +1,105 @@
+@model IEnumerable<FinanceTracker.Models.Transaction>
+@{
+    ViewBag.Title = "Transactions";
+    Layout = "_Layout";
+}
+
+<h2>Transactions</h2>
+
+<!-- Search Form -->
+<form asp-action="Index" method="get">
+    <div class="form-group">
+        <input type="text" name="searchString" 
+               value="@ViewContext.HttpContext.Request.Query["searchString"]" 
+               class="form-control" placeholder="Search description..." />
+    </div>
+    <button type="submit" class="btn btn-primary">Search</button>
+</form>
+
+<table class="table table-striped table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>
+                @Html.ActionLink("Date", "Index", "Transaction", 
+                  new { sortOrder = ViewBag.DateSortParm, searchString = ViewContext.HttpContext.Request.Query["searchString"] }, 
+                  htmlAttributes: null)
+            </th>
+            <th>Description</th>
+            <th>
+                @Html.ActionLink("Amount", "Index", "Transaction", 
+                  new { sortOrder = ViewBag.AmountSortParm, searchString = ViewContext.HttpContext.Request.Query["searchString"] }, 
+                  htmlAttributes: null)
+            </th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var transaction in Model)
+    {
+        <tr>
+            <td>@transaction.Date.ToShortDateString()</td>
+            <td>@transaction.Description</td>
+            <td>@transaction.Amount.ToString("C")</td>
+            <td>@transaction.Type</td>
+            <td>
+                <a class="btn btn-sm btn-secondary" href="/Transaction/Edit/@transaction.Id">Edit</a>
+                <a class="btn btn-sm btn-danger" href="/Transaction/Delete/@transaction.Id">Delete</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+<p>
+    <a class="btn btn-primary" href="/Transaction/Create">Add New Transaction</a>
+    <a class="btn btn-info" href="/Transaction/ExportCsv">Export CSV</a>
+</p>
+
+<!-- Chart Canvas -->
+<div class="mt-5">
+    <h3>Income vs. Expense Over Time</h3>
+    <canvas id="transactionsChart" width="400" height="200"></canvas>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Parse the JSON data from ViewBag
+        var incomeData = JSON.parse('@Html.Raw(ViewBag.IncomeData)');
+        var expenseData = JSON.parse('@Html.Raw(ViewBag.ExpenseData)');
+
+        // Assume the dates are the same for both income and expense for simplicity
+        var labels = incomeData.map(item => new Date(item.Date).toLocaleDateString());
+        var incomeTotals = incomeData.map(item => item.Total);
+        var expenseTotals = expenseData.map(item => item.Total);
+
+        var ctx = document.getElementById('transactionsChart').getContext('2d');
+        var transactionsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Income',
+                    data: incomeTotals,
+                    borderColor: 'green',
+                    fill: false
+                },
+                {
+                    label: 'Expense',
+                    data: expenseTotals,
+                    borderColor: 'red',
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Income vs. Expense Over Time'
+                    }
+                }
+            }
+        });
+    </script>
+}
